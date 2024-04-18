@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masjid Aishe - Prayer Timings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0cfcf;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .prayer-timings {
+            margin-top: 20px;
+        }
+
+        .prayer {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #61deef;
+            border-radius: 10px;
+            color: #333;
+            border: 1px solid #078796;
+        }
+
+        .prayer span {
+            font-weight: bold;
+        }
+
+        .edit-delete-buttons {
+            display: flex;
+            justify-content: center;
+        }
+
+        .edit-delete-buttons button {
+            margin: 0 10px;
+            padding: 6px 20px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .edit-delete-buttons button:hover {
+            background-color: #555;
+        }
+
+        input[type="password"] {
+            padding: 8px;
+            border: 1px solid #dd0101;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 700px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .container {
+                max-width: 900px;
+            }
+        }
+
+        /* Background Animation */
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .background-animation img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.7;
+            
+        }
+
+        @keyframes animateBackground {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) scale(1.1) rotate(180deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="background-animation">
+        <img src="https://source.unsplash.com/1600x900/?mosque,quran" alt="Mosque Background">
+    </div>
+
+    <div class="container">
+        <h1>Masjid Aisha</h1>
+        <h2>Prayer Timings</h2>
+        <div class="prayer-timings" id="prayerTimings">
+            <!-- Timings will be displayed here -->
+        </div>
+        <div class="edit-delete-buttons">
+            <button onclick="authenticate()">Add Prayer</button>
+        </div>
+        <div id="passwordModal" style="display: none;">
+            <input type="password" id="passwordInput" placeholder="Enter admin password">
+        </div>
+    </div>
+
+    <script>
+        let prayerTimes = [];
+        const adminPassword = 'ADILMAJEED';
+
+        window.onload = function() {
+            fetchPrayerTimings();
+        };
+
+        function fetchPrayerTimings() {
+            // Simulated prayer timings, replace with actual data fetch
+            prayerTimes = [
+                { name: 'Fajr', time: '5:30 AM' },
+                { name: 'Dhuhr', time: '12:30 PM' },
+                { name: 'Asr', time: '3:30 PM' },
+                { name: 'Maghrib', time: '6:30 PM' },
+                { name: 'Isha', time: '8:30 PM' }
+            ];
+
+            displayPrayerTimings();
+        }
+
+        function displayPrayerTimings() {
+            const prayerTimingsContainer = document.getElementById('prayerTimings');
+            prayerTimingsContainer.innerHTML = '';
+
+            prayerTimes.forEach((prayer, index) => {
+                const prayerElement = document.createElement('div');
+                prayerElement.classList.add('prayer');
+                prayerElement.innerHTML = `
+                    <span>${prayer.name}</span>: ${prayer.time}
+                    <div class="edit-delete-buttons">
+                        <button onclick="authenticate('${index}', 'edit')">Edit</button>
+                        <button onclick="authenticate('${index}', 'delete')">Delete</button>
+                    </div>
+                `;
+                prayerTimingsContainer.appendChild(prayerElement);
+            });
+        }
+
+        function authenticate(index, action) {
+            const passwordModal = document.getElementById('passwordModal');
+            const passwordInput = document.getElementById('passwordInput');
+
+            passwordModal.style.display = 'block';
+
+            passwordInput.focus();
+
+            passwordInput.onkeyup = function(event) {
+                if (event.keyCode === 13) {
+                    const password = passwordInput.value;
+                    if (password === adminPassword) {
+                        passwordModal.style.display = 'none';
+                        if (action === 'edit') {
+                            editPrayer(index);
+                        } else if (action === 'delete') {
+                            deletePrayer(index);
+                        } else {
+                            addPrayer();
+                        }
+                    } else {
+                        alert('Incorrect password. Only admin can perform this action.');
+                        passwordInput.value = '';
+                    }
+                }
+            };
+        }
+
+        function addPrayer() {
+            const name = prompt('Enter prayer name:');
+            const time = prompt('Enter prayer time (HH:MM AM/PM):');
+            if (name && time) {
+                prayerTimes.push({ name, time });
+                displayPrayerTimings();
+            }
+        }
+
+        function editPrayer(index) {
+            const newName = prompt('Enter new prayer name:', prayerTimes[index].name);
+            const newTime = prompt('Enter new prayer time (HH:MM AM/PM):', prayerTimes[index].time);
+            if (newName && newTime) {
+                prayerTimes[index] = { name: newName, time: newTime };
+                displayPrayerTimings();
+            }
+        }
+
+        function deletePrayer(index) {
+            const confirmDelete = confirm(`Are you sure you want to delete ${prayerTimes[index].name}?`);
+            if (confirmDelete) {
+                prayerTimes.splice(index, 1);
+                displayPrayerTimings();
+            }
+        }
+    </script>
+</body>
+</html>
